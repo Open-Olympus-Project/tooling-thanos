@@ -312,12 +312,18 @@ query:
       # Set default backend for ingress
       defaultBackend: false
       annotations:
-         kubernetes.io/ingress.class: nginx
-        # kubernetes.io/tls-acme: "true"
+        kubernetes.io/ingress.class: nginx
+        kubernetes.io/tls-acme: 'true'
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
       labels: {}
-      path: "/"
-      hosts:
-        - "query.madsht.com"
+      
+      paths:
+      - /thanos-query
+      - /thanos-query/(.*)
+
+      hosts: []
+        # - "example.com"
       tls: []
       #  - secretName: chart-example-tls
       #    hosts:
