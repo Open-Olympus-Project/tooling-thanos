@@ -14,7 +14,7 @@ query:
   http:
     ingress:
       hosts:
-      - ${{ fqdn }}
+      - {{ fqdn }}
       tls:
       - secretName: thanos-query-tls
         hosts:
