@@ -54,7 +54,7 @@ spec:
         - "--log.format={{ .Values.rule.logFormat }}"
         - "--http-address=0.0.0.0:{{ .Values.rule.http.port }}"
         - "--grpc-address=0.0.0.0:{{ .Values.rule.grpc.port }}"
-        - "--objstore.config-file=/etc/config/object-store.yaml"
+        - "--objstore.config-file={{ .Values.global.objectStoreConfigLocation }}"
         - "--rule-file=/etc/rules/*.yaml"
         {{- range $key, $val := .Values.rule.ruleLabels }}
         - '--label={{ $key }}={{ $val | quote }}'

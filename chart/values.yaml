@@ -3,6 +3,9 @@ image:
   tag: v0.13.0
   pullPolicy: IfNotPresent
 
+global:
+  objectStoreConfigLocation: /etc/config/object-store.yaml
+
 store:
   enabled: true
   # Maximum size of items held in the index cache.
@@ -447,7 +450,7 @@ compact:
   #  cluster: example
   #
   # Extra annotations for compact pod template
-  annotations: {}
+  CCC
   #  example.com: default
   #
   # Add extra labels to compact deployment
@@ -894,7 +897,7 @@ sidecar:
 
 # This is the general backend configuration. Please se the examples below to configurate object store.
 # More information can be found at thanos github repositoriy: https://github.com/thanos-io/thanos/blob/master/docs/storage.md
-# Existing secret containing the configuration. The key must be `object-store.yaml`
+# Existing secret containing the configuration. The key must be `f.yaml`
 objstoreSecretOverride: ""
 # Text representation of the configuration
 objstoreFile: ""
@@ -938,8 +941,8 @@ objstore:
   #
   type: AZURE
   config:
-    storage_account: "observabilitymetrics1234"
-    storage_account_key: "J6BtTV411cx4/Jd8yMYqJUXO9cdUQNJ0GiXlqjg83M2cGok7TFrpvFmiHcgDlZ8cE2ZMXfMTTFw0m0aaAwGJug=="
+    storage_account: "<sa_name>"
+    storage_account_key: "<sa_key>"
     container: "thanos"
     endpoint: ""
     max_retries: 3

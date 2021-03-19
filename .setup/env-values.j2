@@ -1,8 +1,74 @@
-objstore:
-  type: AZURE
-  config:
-    storage_account: "< sa_name >"
-    storage_account_key: "< sa_key >"
-    container: "thanos"
-    endpoint: ""
-    max_retries: 3
+global:
+  objectStoreConfigLocation: /vault/secret/bucket.yml
+
+store:
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "k8s-secrets"
+    vault.hashicorp.com/agent-inject-secret-bucket.yml: "k8s/data/secrets/storage-account-creds"
+    vault.hashicorp.com/agent-inject-template-bucket.yml: |
+      {%- raw %}
+      {{- with secret "k8s/data/secrets/storage-account-creds" -}}
+      type: AZURE
+      config:
+        storage_account: "{{ .Data.data.sa_name }}"
+        storage_account_key: "{{ .Data.data.sa_key }}"
+        container: "thanos"
+        endpoint: ""
+        max_retries: 3
+      {{- end -}}
+      {%- endraw %}
+
+compact:
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "k8s-secrets"
+    vault.hashicorp.com/agent-inject-secret-bucket.yml: "k8s/data/secrets/storage-account-creds"
+    vault.hashicorp.com/agent-inject-template-bucket.yml: |
+      {%- raw %}
+      {{- with secret "k8s/data/secrets/storage-account-creds" -}}
+      type: AZURE
+      config:
+        storage_account: "{{ .Data.data.sa_name }}"
+        storage_account_key: "{{ .Data.data.sa_key }}"
+        container: "thanos"
+        endpoint: ""
+        max_retries: 3
+      {{- end -}}
+      {%- endraw %}
+
+bucket:
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "k8s-secrets"
+    vault.hashicorp.com/agent-inject-secret-bucket.yml: "k8s/data/secrets/storage-account-creds"
+    vault.hashicorp.com/agent-inject-template-bucket.yml: |
+      {%- raw %}
+      {{- with secret "k8s/data/secrets/storage-account-creds" -}}
+      type: AZURE
+      config:
+        storage_account: "{{ .Data.data.sa_name }}"
+        storage_account_key: "{{ .Data.data.sa_key }}"
+        container: "thanos"
+        endpoint: ""
+        max_retries: 3
+      {{- end -}}
+      {%- endraw %}
+
+rule:
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "k8s-secrets"
+    vault.hashicorp.com/agent-inject-secret-bucket.yml: "k8s/data/secrets/storage-account-creds"
+    vault.hashicorp.com/agent-inject-template-bucket.yml: |
+      {%- raw %}
+      {{- with secret "k8s/data/secrets/storage-account-creds" -}}
+      type: AZURE
+      config:
+        storage_account: "{{ .Data.data.sa_name }}"
+        storage_account_key: "{{ .Data.data.sa_key }}"
+        container: "thanos"
+        endpoint: ""
+        max_retries: 3
+      {{- end -}}
+      {%- endraw %}

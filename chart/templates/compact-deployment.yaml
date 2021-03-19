@@ -53,7 +53,7 @@ spec:
         - "--log.level={{ .Values.compact.logLevel }}"
         - "--log.format={{ .Values.compact.logFormat }}"
         - "--http-address=0.0.0.0:{{ .Values.compact.http.port }}"
-        - "--objstore.config-file=/etc/config/object-store.yaml"
+        - "--objstore.config-file={{ .Values.global.objectStoreConfigLocation }}"
         - "--data-dir=/var/thanos/compact"
         - "--consistency-delay={{ .Values.compact.consistencyDelay }}"
         - "--retention.resolution-raw={{ .Values.compact.retentionResolutionRaw }}"

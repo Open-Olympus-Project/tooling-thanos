@@ -50,7 +50,7 @@ spec:
           - "--log.level={{ .Values.bucket.logLevel }}"
           - "--log.format={{ .Values.bucket.logFormat }}"
           - "--http-address=0.0.0.0:{{ .Values.bucket.http.port }}"
-          - "--objstore.config-file=/etc/config/object-store.yaml"
+          - "--objstore.config-file={{ .Values.global.objectStoreConfigLocation }}"
           {{- if .Values.bucket.refresh }}
           - "--refresh={{ .Values.bucket.refresh }}"
           {{- end }}

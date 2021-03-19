@@ -64,7 +64,7 @@ spec:
         - "--log.format={{ $root.Values.store.logFormat }}"
         - "--http-address=0.0.0.0:{{ $root.Values.store.http.port }}"
         - "--grpc-address=0.0.0.0:{{ $root.Values.store.grpc.port }}"
-        - "--objstore.config-file=/etc/config/object-store.yaml"
+        - "--objstore.config-file={{ $root.Values.global.objectStoreConfigLocation }}"
         {{- if $root.Values.store.indexCacheSize }}
         - "--index-cache-size={{ $root.Values.store.indexCacheSize }}"
         {{- end }}
