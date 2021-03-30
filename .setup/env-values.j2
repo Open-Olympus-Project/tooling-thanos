@@ -1,0 +1,47 @@
+store:
+  enabled: false
+
+query:
+  enabled: false
+  
+compact:
+  enabled: true
+  
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "k8s-secrets"
+    vault.hashicorp.com/agent-inject-secret-bucket.yml: "k8s/data/secrets/storage-account-creds"
+    vault.hashicorp.com/agent-inject-template-bucket.yml: |
+      {%- raw %}
+      {{- with secret "k8s/data/secrets/storage-account-creds" -}}
+      type: AZURE
+      config:
+        storage_account: "{{ .Data.data.sa_name }}"
+        storage_account_key: "{{ .Data.data.sa_key }}"
+        container: "thanos"
+        endpoint: ""
+        max_retries: 3
+      {{- end -}}
+      {%- endraw %}
+
+bucket:
+  enabled: false
+  
+sidecar:
+  ingress:
+  enabled: false
+  # Set default backend for ingress
+  defaultBackend: false
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: 'true'
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels: {}
+  path: "/prometheus-side"
+  hosts:
+    - "{{ fqdn }}"
+  tls:
+    - secretName: thanos-sidecar-tls
+      hosts:
+        - {{ fqdn }}
+  
