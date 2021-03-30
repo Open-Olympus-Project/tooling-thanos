@@ -2,7 +2,26 @@ store:
   enabled: false
 
 query:
-  enabled: false
+  # Prefix for API and UI endpoints. This allows thanos UI to be served on a sub-path.
+  # This option is analogous to --web.route-prefix of Promethus.
+  webRoutePrefix: "/thanos-query"
+  # Static prefix for all HTML links and redirect
+  #  URLs in the UI query web interface. Actual
+  #  endpoints are still served on / or the
+  #  web.route-prefix. This allows thanos UI to be
+  #  served behind a reverse proxy that strips a URL
+  #  sub-path.
+  webExternalPrefix: "/thanos-query"
+
+  # The http endpoint to communicate with other components
+  http:
+    ingress:
+      hosts:
+      - {{ fqdn }}
+      tls:
+      - secretName: thanos-query-tls
+        hosts:
+          - {{ fqdn }}
   
 compact:
   enabled: false
@@ -11,46 +30,4 @@ bucket:
   enabled: false
 
 sidecar:
-  # NOTE: This is only the service references for the sidecar
-  enabled: true
-  selector:
-    app: prometheus
-  # Enable metrics collecting for sidecar service
-  metrics:
-    # Enable ServiceMonitor https://github.com/coreos/prometheus-operator
-    serviceMonitor:
-      enabled: false
-      # Labels for prometheus-operator to find servicemonitor
-      labels: {}
-  # The grpc endpoint to communicate with other components
-  grpc:
-    # grpc listen port number
-    port: 10901
-    # Service definition for sidecar grpc service
-    service:
-      type: ClusterIP
-      # The node port number to use when the service type is set as 'NodePort'
-      nodePort: 31901
-      # External IPs assigned to sidecar grpc service
-      externalIPs: []
-      # Annotations to sidecar grpc service
-      annotations: {}
-      # Labels to sidecar grpc service
-      labels: {}
-    # Set up ingress for the grpc service
-    ingress:
-      enabled: true
-      # Set default backend for ingress
-      defaultBackend: false
-      annotations: 
-        kubernetes.io/ingress.class: nginx
-        kubernetes.io/tls-acme: 'true'
-        cert-manager.io/cluster-issuer: letsencrypt-prod
-      labels: {}
-      path: "/prometheus-side"
-      hosts:
-        - "{{ fqdn }}"
-      tls:
-        - secretName: thanos-sidecar-tls
-          hosts:
-            - {{ fqdn }}
+  enabled: false
