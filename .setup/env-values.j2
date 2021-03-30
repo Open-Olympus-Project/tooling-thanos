@@ -1,10 +1,7 @@
 store:
   enabled: false
 
-query:
-  stores: 
-  - tooling-thanos-{{ env }}-query-http.svc.cluster.local
-  
+query:  
   # Prefix for API and UI endpoints. This allows thanos UI to be served on a sub-path.
   # This option is analogous to --web.route-prefix of Promethus.
   webRoutePrefix: "/thanos-query"
@@ -19,13 +16,20 @@ query:
   # The http endpoint to communicate with other components
   http:
     ingress:
+      enabled: false
+  grpc:
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+        ingress.kubernetes.io/ssl-redirect: "true"
       hosts:
-      - {{ fqdn }}
+        - "{{ fqdn }}"
       tls:
-      - secretName: thanos-query-tls
-        hosts:
-          - {{ fqdn }}
-  
+        - secretName: thanos-query-grpc-tls
+          hosts:
+            - {{ fqdn }}
 compact:
   enabled: false
 
