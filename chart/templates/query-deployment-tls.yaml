@@ -10,112 +10,112 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Chart.AppVersion | replace "+" "_" }}
     app.kubernetes.io/component: query-tls
-{{ with .Values.query.deploymentLabels }}{{ toYaml . | indent 4 }}{{ end }}
-  {{- with .Values.query.deploymentAnnotations }}
+{{ with .Values.querytls.deploymentLabels }}{{ toYaml . | indent 4 }}{{ end }}
+  {{- with .Values.querytls.deploymentAnnotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.query.autoscaling.enabled  }}
-  replicas: {{ .Values.query.replicaCount | default 1 }}
+  {{- if not .Values.querytls.autoscaling.enabled  }}
+  replicas: {{ .Values.querytls.replicaCount | default 1 }}
   {{- end }}
-  {{- with  .Values.query.strategy }}
+  {{- with  .Values.querytls.strategy }}
   strategy: {{ toYaml . | nindent 4 }}
   {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "thanos.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: query
-{{ with .Values.query.deploymentMatchLabels }}{{ toYaml . | indent 6 }}{{ end }}
+      app.kubernetes.io/component: query-tls
+{{ with .Values.querytls.deploymentMatchLabels }}{{ toYaml . | indent 6 }}{{ end }}
   template:
     metadata:
       labels:
         app.kubernetes.io/name: {{ include "thanos.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: query
-{{ with  .Values.query.labels }}{{ toYaml . | indent 8 }}{{ end }}
-      {{- if or .Values.query.annotations .Values.query.metrics.annotations.enabled }}
+        app.kubernetes.io/component: query-tls
+{{ with  .Values.querytls.labels }}{{ toYaml . | indent 8 }}{{ end }}
+      {{- if or .Values.querytls.annotations .Values.querytls.metrics.annotations.enabled }}
       annotations:
       {{- end }}
-      {{- with  .Values.query.annotations }}{{ toYaml . | nindent 8 }}{{- end }}
-      {{- if .Values.query.metrics.annotations.enabled  }}
+      {{- with  .Values.querytls.annotations }}{{ toYaml . | nindent 8 }}{{- end }}
+      {{- if .Values.querytls.metrics.annotations.enabled  }}
         prometheus.io/scrape: "true"
-        prometheus.io/port: "{{ .Values.query.http.port }}"
+        prometheus.io/port: "{{ .Values.querytls.http.port }}"
       {{- end }}
     spec:
       containers:
-      - name: thanos-query
+      - name: thanos-querytls
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- with .Values.query.extraEnv }}
+        {{- with .Values.querytls.extraEnv }}
         env: {{ toYaml . | nindent 8 }}
         {{- end }}
         args:
         - "query"
-        - "--log.level={{ .Values.query.logLevel }}"
-        - "--log.format={{ .Values.query.logFormat }}"
-        - "--grpc-address=0.0.0.0:{{ .Values.query.grpc.port }}"
-        - "--http-address=0.0.0.0:{{ .Values.query.http.port }}"
+        - "--log.level={{ .Values.querytls.logLevel }}"
+        - "--log.format={{ .Values.querytls.logFormat }}"
+        - "--grpc-address=0.0.0.0:{{ .Values.querytls.grpc.port }}"
+        - "--http-address=0.0.0.0:{{ .Values.querytls.http.port }}"
         - "--grpc-client-tls-secure"
-        {{- range .Values.query.replicaLabels }}
-        - "--query.replica-label={{ . }}"
+        {{- range .Values.querytls.replicaLabels }}
+        - "--querytls.replica-label={{ . }}"
         {{- end }}
-        {{- if .Values.query.autoDownsampling }}
-        - "--query.auto-downsampling"
+        {{- if .Values.querytls.autoDownsampling }}
+        - "--querytls.auto-downsampling"
         {{- end }}
-        {{- if .Values.query.webRoutePrefix }}
-        - "--web.route-prefix={{ .Values.query.webRoutePrefix }}"
+        {{- if .Values.querytls.webRoutePrefix }}
+        - "--web.route-prefix={{ .Values.querytls.webRoutePrefix }}"
         {{- end }}
-        {{- if .Values.query.webExternalPrefix }}
-        - "--web.external-prefix={{ .Values.query.webExternalPrefix }}"
+        {{- if .Values.querytls.webExternalPrefix }}
+        - "--web.external-prefix={{ .Values.querytls.webExternalPrefix }}"
         {{- end }}
-        {{- if .Values.query.webPrefixHeader }}
-        - "--web.prefix-header={{ .Values.query.webPrefixHeader }}"
+        {{- if .Values.querytls.webPrefixHeader }}
+        - "--web.prefix-header={{ .Values.querytls.webPrefixHeader }}"
         {{- end }}
-        {{- if .Values.query.storeDNSResolver }}
-        - "--store.sd-dns-resolver={{ .Values.query.storeDNSResolver }}"
+        {{- if .Values.querytls.storeDNSResolver }}
+        - "--store.sd-dns-resolver={{ .Values.querytls.storeDNSResolver }}"
         {{- end }}
-        {{- if .Values.query.storeDNSDiscovery }}
+        {{- if .Values.querytls.storeDNSDiscovery }}
         - "--store=dnssrv+_grpc._tcp.{{ include "thanos.componentname" (list $ "store") }}-grpc.{{ .Release.Namespace }}.svc.cluster.local"
         {{- end  }}
-        {{- if .Values.query.sidecarDNSDiscovery }}
+        {{- if .Values.querytls.sidecarDNSDiscovery }}
         - "--store=dnssrv+_grpc._tcp.{{ include "thanos.componentname" (list $ "sidecar") }}-grpc.{{ .Release.Namespace }}.svc.cluster.local"
         {{- end  }}
-        {{- if .Values.query.ruleDNSDiscovery }}
+        {{- if .Values.querytls.ruleDNSDiscovery }}
         - "--store=dnssrv+_grpc._tcp.{{ include "thanos.componentname" (list $ "rule") }}-grpc.{{ .Release.Namespace }}.svc.cluster.local"
         {{- end  }}
-        {{- range .Values.query.stores }}
+        {{- range .Values.querytls.stores }}
         - "--store={{ . }}"
         {{- end }}
-        {{- range .Values.query.serviceDiscoveryFiles }}
+        {{- range .Values.querytls.serviceDiscoveryFiles }}
         - "--store.sd-files={{ . }}"
         {{- end }}
-        {{- range .Values.query.serviceDiscoveryFileConfigMaps }}
+        {{- range .Values.querytls.serviceDiscoveryFileConfigMaps }}
         - "--store.sd-files=/etc/query/{{ . }}/*.yaml"
         - "--store.sd-files=/etc/query/{{ . }}/*.yml"
         - "--store.sd-files=/etc/query/{{ . }}/*.json"
         {{- end }}
-        {{- if .Values.query.serviceDiscoveryInterval }}
-        - "--store.sd-interval={{ .Values.query.serviceDiscoveryInterval }}"
+        {{- if .Values.querytls.serviceDiscoveryInterval }}
+        - "--store.sd-interval={{ .Values.querytls.serviceDiscoveryInterval }}"
         {{- end }}
-        {{- if .Values.query.extraArgs }}
-        {{ toYaml .Values.query.extraArgs | nindent 8 }}
+        {{- if .Values.querytls.extraArgs }}
+        {{ toYaml .Values.querytls.extraArgs | nindent 8 }}
         {{- end }}
         ports:
         - name: http
-          containerPort: {{ .Values.query.http.port}}
+          containerPort: {{ .Values.querytls.http.port}}
         - name: grpc
-          containerPort: {{ .Values.query.grpc.port }}
+          containerPort: {{ .Values.querytls.grpc.port }}
         resources:
-          {{ toYaml .Values.query.resources | nindent 10 }}
+          {{ toYaml .Values.querytls.resources | nindent 10 }}
         volumeMounts:
-        {{- range .Values.query.serviceDiscoveryFileConfigMaps }}
+        {{- range .Values.querytls.serviceDiscoveryFileConfigMaps }}
         - mountPath: /etc/query/{{ . }}
           name: {{ . }}
         {{- end }}
-        {{- if .Values.query.certSecretName }}
+        {{- if .Values.querytls.certSecretName }}
         - mountPath: /etc/certs
-          name: {{ .Values.query.certSecretName }}
+          name: {{ .Values.querytls.certSecretName }}
           readOnly: true
         {{- end }}
         livenessProbe:
@@ -127,28 +127,28 @@ spec:
             path: /-/ready
             port: http
       volumes:
-      {{- range .Values.query.serviceDiscoveryFileConfigMaps }}
+      {{- range .Values.querytls.serviceDiscoveryFileConfigMaps }}
       - name: {{ . }}
         configMap:
           defaultMode: 420
           name: {{ . }}
       {{- end }}
-      {{- if .Values.query.certSecretName }}
-      - name: {{ .Values.query.certSecretName }}
+      {{- if .Values.querytls.certSecretName }}
+      - name: {{ .Values.querytls.certSecretName }}
         secret:
           defaultMode: 420
-          secretName: {{ .Values.query.certSecretName }}
+          secretName: {{ .Values.querytls.certSecretName }}
       {{- end }}
-      {{- with .Values.query.securityContext }}
+      {{- with .Values.querytls.securityContext }}
       securityContext: {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.query.nodeSelector }}
+      {{- with .Values.querytls.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.query.affinity }}
+      {{- with .Values.querytls.affinity }}
       affinity: {{ toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.query.tolerations }}
+      {{- with .Values.querytls.tolerations }}
       tolerations: {{ toYaml . | nindent 8 }}
       {{- end }}
       {{- with  (include "thanos.query.serviceaccount" . ) }}
