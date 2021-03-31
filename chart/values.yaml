@@ -522,7 +522,7 @@ query:
       matchLabels: {}
     # Set up ingress for the http service
     ingress:
-      enabled: true
+      enabled: false
       # Set default backend for ingress
       defaultBackend: false
       annotations:
