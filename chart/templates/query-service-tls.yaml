@@ -25,7 +25,7 @@ spec:
   selector:
     app.kubernetes.io/name: {{ include "thanos.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: query-yls
+    app.kubernetes.io/component: query-tls
 {{ with .Values.querytls.grpc.service.matchLabels }}{{ toYaml . | indent 4 }}{{ end }}
 
 ---
