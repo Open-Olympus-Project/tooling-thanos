@@ -2,6 +2,20 @@ store:
   enabled: false
 
 query:
+  enabled: false
+  http:
+    ingress:
+      enabled: false
+
+compact:
+  enabled: false
+
+bucket:
+  enabled: false
+
+sidecar:
+  # NOTE: This is only the service references for the sidecar
+  enabled: true
   http:
     ingress:
       enabled: false
@@ -10,19 +24,12 @@ query:
       enabled: true
       annotations:
         kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/ssl-redirect: "false"
         nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
-        ingress.kubernetes.io/ssl-redirect: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
       hosts:
         - "{{ fqdn }}"
       tls:
-        - secretName: thanos-query-grpc-tls
+        - secretName: thanos-sidecar-grpc-tls
           hosts:
-            - {{ fqdn }}
-compact:
-  enabled: false
-
-bucket:
-  enabled: false
-
-sidecar:
-  enabled: true
+            -  {{ fqdn }}
