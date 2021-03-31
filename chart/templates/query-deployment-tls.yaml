@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/version: {{ .Chart.AppVersion | replace "+" "_" }}
-    app.kubernetes.io/component: query
+    app.kubernetes.io/component: query-tls
 {{ with .Values.query.deploymentLabels }}{{ toYaml . | indent 4 }}{{ end }}
   {{- with .Values.query.deploymentAnnotations }}
   annotations: {{ toYaml . | nindent 4 }}
