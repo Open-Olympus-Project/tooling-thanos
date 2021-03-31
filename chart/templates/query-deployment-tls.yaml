@@ -1,4 +1,4 @@
-{{ if .Values.query-tls.enabled }}
+{{ if .Values.querytls.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
