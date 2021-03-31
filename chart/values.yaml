@@ -426,8 +426,9 @@ query:
   sidecarDNSDiscovery: true
   # Enable DNS discovery for queries
   ruleDNSDiscovery: false
-  # Enabled DNS discovery for tls-enabled query
-  querytlsDNSDiscovery: false
+
+  # Adds query-tls to the store
+  querytlsStore: false
   # Addresses of statically configured store API servers (repeatable).
   # The scheme may be prefixed with 'dns+' or 'dnssrv+' to detect store API servers through respective DNS lookups.
   stores: 
