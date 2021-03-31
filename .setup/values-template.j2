@@ -1,27 +1,21 @@
 global:
   objectStoreConfigLocation: /vault/secrets/bucket.yml
 
-query:
-  # Prefix for API and UI endpoints. This allows thanos UI to be served on a sub-path.
-  # This option is analogous to --web.route-prefix of Promethus.
-  webRoutePrefix: "/thanos-query"
-  # Static prefix for all HTML links and redirect
-  #  URLs in the UI query web interface. Actual
-  #  endpoints are still served on / or the
-  #  web.route-prefix. This allows thanos UI to be
-  #  served behind a reverse proxy that strips a URL
-  #  sub-path.
-  webExternalPrefix: "/thanos-query"
+querytls:
+  enabled: true
+  stores:
+  - dp-test.westeurope.cloudapp.azure.com:443
 
-  # The http endpoint to communicate with other components
-  http:
-    ingress:
-      hosts:
-      - {{ fqdn }}
-      tls:
-      - secretName: thanos-query-tls
-        hosts:
-          - {{ fqdn }}
+  # Enable DNS discovery for stores
+  storeDNSDiscovery: false
+  # Enable DNS discovery for sidecars (this is for the chart built-in sidecar service)
+  sidecarDNSDiscovery: false
+  # Enable DNS discovery for queries
+  ruleDNSDiscovery: false
+
+query:
+  # Adds query-tls to the store
+  querytlsStore: true
 
 store:
   annotations:
