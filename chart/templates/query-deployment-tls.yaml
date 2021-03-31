@@ -44,7 +44,7 @@ spec:
       {{- end }}
     spec:
       containers:
-      - name: thanos-querytls
+      - name: thanos-query-tls
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- with .Values.querytls.extraEnv }}
@@ -58,10 +58,10 @@ spec:
         - "--http-address=0.0.0.0:{{ .Values.querytls.http.port }}"
         - "--grpc-client-tls-secure"
         {{- range .Values.querytls.replicaLabels }}
-        - "--querytls.replica-label={{ . }}"
+        - "--query.replica-label={{ . }}"
         {{- end }}
         {{- if .Values.querytls.autoDownsampling }}
-        - "--querytls.auto-downsampling"
+        - "--query.auto-downsampling"
         {{- end }}
         {{- if .Values.querytls.webRoutePrefix }}
         - "--web.route-prefix={{ .Values.querytls.webRoutePrefix }}"
