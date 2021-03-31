@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "thanos.componentname" (list $ "query") }}-grpc
+  name: {{ include "thanos.componentname" (list $ "query") }}-grpc-tls
   {{- with .Values.query.grpc.service.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
@@ -33,7 +33,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "thanos.componentname" (list $ "query") }}-http
+  name: {{ include "thanos.componentname" (list $ "query") }}-http-tls
   {{- with .Values.query.http.service.annotations }}
   annotations: {{ toYaml .| nindent 4 }}
   {{- end }}
