@@ -83,6 +83,9 @@ spec:
         {{- if .Values.query.ruleDNSDiscovery }}
         - "--store=dnssrv+_grpc._tcp.{{ include "thanos.componentname" (list $ "rule") }}-grpc.{{ .Release.Namespace }}.svc.cluster.local"
         {{- end  }}
+        {{- if .Values.query.querytlsStore }}
+        - "--store={{ include "thanos.componentname" (list $ "query") }}-grpc-tls.{{ .Release.Namespace }}.svc.cluster.local:10901"
+        {{- end  }}
         {{- range .Values.query.stores }}
         - "--store={{ . }}"
         {{- end }}

@@ -1,0 +1,63 @@
+{{- if .Values.querytls.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thanos.componentname" (list $ "query") }}-grpc-tls
+  {{- with .Values.querytls.grpc.service.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    app.kubernetes.io/name: {{ include "thanos.name" . }}
+    helm.sh/chart: {{ include "thanos.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ $.Chart.AppVersion | replace "+" "_" }}
+    app.kubernetes.io/component: query-tls
+{{ with .Values.querytls.grpc.service.labels }}{{ toYaml . | indent 4 }}{{ end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: {{ .Values.querytls.grpc.port }}
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
+  selector:
+    app.kubernetes.io/name: {{ include "thanos.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: query-tls
+{{ with .Values.querytls.grpc.service.matchLabels }}{{ toYaml . | indent 4 }}{{ end }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thanos.componentname" (list $ "query") }}-http-tls
+  {{- with .Values.querytls.http.service.annotations }}
+  annotations: {{ toYaml .| nindent 4 }}
+  {{- end }}
+  labels:
+    app.kubernetes.io/name: {{ include "thanos.name" . }}
+    helm.sh/chart: {{ include "thanos.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/version: {{ $.Chart.AppVersion | replace "+" "_" }}
+    app.kubernetes.io/component: query-tls
+{{ with .Values.querytls.http.service.labels }}{{ toYaml . | indent 4 }}{{ end }}
+spec:
+  type: {{ .Values.querytls.http.service.type }}
+  {{- if .Values.querytls.http.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.querytls.http.externalTrafficPolicy }}
+  {{- end }}
+  ports:
+    - port: {{ .Values.querytls.http.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "thanos.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: query-tls
+{{ with .Values.querytls.http.service.matchLabels }}{{ toYaml . | indent 4 }}{{ end }}
+{{- end -}}
