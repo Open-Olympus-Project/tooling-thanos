@@ -92,8 +92,7 @@ store:
     # Service definition for query grpc service
     service:
       # Annotations to query grpc service
-      annotations:
-        prometheus.io/scrape: "false"
+      annotations: {}
       # Labels to query grpc service
       labels: {}
       # Match labels for service selector
@@ -268,8 +267,7 @@ querytls:
     # Service definition for query grpc service
     service:
       # Annotations to query grpc service
-      annotations:
-        prometheus.io/scrape: "false"
+      annotations: {}
       # Labels to query grpc service
       labels: {}
       # Match labels for service selector
@@ -480,8 +478,7 @@ query:
     # Service definition for query grpc service
     service:
       # Annotations to query grpc service
-      annotations:
-        prometheus.io/scrape: "false"
+      annotations: {}
       # Labels to query grpc service
       labels: {}
       # Match labels for service selector
@@ -921,8 +918,7 @@ rule:
     # Service definition for rule grpc service
     service:
       # Annotations to rule grpc service
-      annotations:
-        prometheus.io/scrape: "false"
+      annotations: {}
       # labels to rule grpc service
       labels: {}
       # Match labels for service selector
@@ -1059,8 +1055,7 @@ sidecar:
       # External IPs assigned to sidecar grpc service
       externalIPs: []
       # Annotations to sidecar grpc service
-      annotations:
-        prometheus.io/scrape: "false"
+      annotations: {}
       # Labels to sidecar grpc service
       labels: {}
     # Set up ingress for the grpc service
