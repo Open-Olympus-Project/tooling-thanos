@@ -122,8 +122,7 @@ store:
     service:
       type: ClusterIP
       # Annotations to query http service
-      annotations: 
-        prometheus.io/scrape: "true"
+      annotations: {}
       # Labels to query http service
       labels: {}
       # Match labels for service selector
@@ -303,8 +302,7 @@ querytls:
     service:
       type: ClusterIP
       # Annotations to query http service
-      annotations: 
-        prometheus.io/scrape: "true"
+      annotations: {}
       # Labels to query http service
       labels: {}
       # Match labels for service selector
@@ -514,8 +512,7 @@ query:
     service:
       type: ClusterIP
       # Annotations to query http service
-      annotations: 
-        prometheus.io/scrape: "true"
+      annotations: {}
       # Labels to query http service
       labels: {}
       # Match labels for service selector
@@ -735,8 +732,7 @@ bucket:
     service:
       type: ClusterIP
       # Annotations to bucket http service
-      annotations: 
-        prometheus.io/scrape: "true"
+      annotations: {}
       # Labels to bucket http service
       labels: {}
       # Match labels for service selector
@@ -949,8 +945,7 @@ rule:
     service:
       type: ClusterIP
       # Annotations to rule http service
-      annotations: 
-        prometheus.io/scrape: "true"
+      annotations: {}
       # Labels to rule http service
       labels: {}
       # Match labels for service selector
@@ -1083,8 +1078,7 @@ sidecar:
     service:
       type: ClusterIP
       # Annotations to sidecar http service
-      annotations:
-        prometheus.io/scrape: "true"
+      annotations: {}
       # Labels to sidecar http service
       labels: {}
     # Set up ingress for the http service
