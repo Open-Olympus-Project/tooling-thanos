@@ -215,11 +215,8 @@ querytls:
 thanos: # Values for the subchart
   image:
     repository: quay.io/thanos/thanos
-    tag: v0.13.0
+    tag: v0.17.1
     pullPolicy: IfNotPresent
-
-  global:
-    objectStoreConfigLocation: /etc/config/object-store.yaml
 
   store:
     enabled: true
@@ -294,7 +291,7 @@ thanos: # Values for the subchart
     metrics:
       # This is the Prometheus annotation type scraping configuration
       annotations:
-        enabled: true
+        enabled: false
       # Enable ServiceMonitor https://github.com/coreos/prometheus-operator
       serviceMonitor:
         enabled: false
@@ -337,8 +334,7 @@ thanos: # Values for the subchart
       service:
         type: ClusterIP
         # Annotations to query http service
-        annotations: 
-          prometheus.io/scrape: "true"
+        annotations: {}
         # Labels to query http service
         labels: {}
         # Match labels for service selector
@@ -347,6 +343,10 @@ thanos: # Values for the subchart
       ingress:
         enabled: false
         # Set default backend for ingress
+
+        apiVersion: extensions/v1beta1
+        # Set API version for ingress
+
         defaultBackend: false
         annotations: {}
           # kubernetes.io/ingress.class: nginx
@@ -395,11 +395,12 @@ thanos: # Values for the subchart
     timePartioning:
       - min: ""
         max: ""
-    
+    # Setting hashPartioning will create multiple store deployments based on the number of shards specified using the hashmod of the blocks
+    # See https://thanos.io/sharding.md/#relabelling
+    hashPartioning: {}
+      # shards:
     # InitContainers allows injecting specialized containers that run before app containers. This is meant to pre-configure and tune mounted volume permissions.
     initContainers: []
-
-  
   query:
     enabled: true
     # Labels to treat as a replica indicator along which data is deduplicated.
@@ -434,12 +435,9 @@ thanos: # Values for the subchart
     sidecarDNSDiscovery: true
     # Enable DNS discovery for queries
     ruleDNSDiscovery: false
-
-    # Adds query-tls to the store
-    querytlsStore: false
     # Addresses of statically configured store API servers (repeatable).
     # The scheme may be prefixed with 'dns+' or 'dnssrv+' to detect store API servers through respective DNS lookups.
-    stores: 
+    stores: []
     #  - "dnssrv+_grpc._tcp.<service>.<namespace>.svc.cluster.local"
     #
     # Path to files that contains addresses of store API servers. The path can be a glob pattern (repeatable).
@@ -508,6 +506,8 @@ thanos: # Values for the subchart
         #    hosts:
         #      - chart-example.local
     serviceAccount: ""
+    # Optional annotations to be added to the ServiceAccount
+    serviceAccountAnnotations: {}
 
     psp:
       enabled: false
@@ -522,8 +522,7 @@ thanos: # Values for the subchart
       service:
         type: ClusterIP
         # Annotations to query http service
-        annotations: 
-          prometheus.io/scrape: "true"
+        annotations: {}
         # Labels to query http service
         labels: {}
         # Match labels for service selector
@@ -532,20 +531,18 @@ thanos: # Values for the subchart
       ingress:
         enabled: false
         # Set default backend for ingress
-        defaultBackend: false
-        annotations:
-          kubernetes.io/ingress.class: nginx
-          kubernetes.io/tls-acme: 'true'
-          cert-manager.io/cluster-issuer: letsencrypt-prod
-          nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
-        labels: {}
-        
-        paths:
-        - /thanos-query
-        - /thanos-query/(.*)
 
-        hosts: []
-          # - "example.com"
+        apiVersion: extensions/v1beta1
+        # Set API version for ingress
+
+        defaultBackend: false
+        annotations: {}
+          # kubernetes.io/ingress.class: nginx
+          # kubernetes.io/tls-acme: "true"
+        labels: {}
+        path: "/"
+        hosts:
+          - "/"
         tls: []
         #  - secretName: chart-example-tls
         #    hosts:
@@ -575,10 +572,10 @@ thanos: # Values for the subchart
     metrics:
       # This is the Prometheus annotation type scraping configuration
       annotations:
-        enabled: true
+        enabled: false
       # Enable ServiceMonitor https://github.com/coreos/prometheus-operator
       serviceMonitor:
-        enabled: false  
+        enabled: false
         # Labels for prometheus-operator to find servicemonitor
         labels: {}
 
@@ -608,6 +605,218 @@ thanos: # Values for the subchart
     # Pod affinity
     # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#node-affinity
     affinity: {}
+    # set up store readinessProbe & livenessProbe
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+    livenessProbe:
+      httpGet:
+        path: /-/healthy
+        port: http
+    readinessProbe:
+      httpGet:
+        path: /-/ready
+        port: http
+
+  queryFrontend:
+    enabled: false
+    # Add extra environment variables to query-frontend
+    extraEnv: []
+    # - name: ENV
+    #   value: value
+    #
+    # Add extra arguments to the query-frontend service
+    extraArgs: []
+    # - "--extraargs=extravalue"
+    #
+    # Number of replicas running from query-frontend component
+    replicaCount: 1
+    # Kubernetes deployment strategy object as documented in https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+    strategy: {}
+    # Enable HPA for query-frontend component
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 50
+      targetMemoryUtilizationPercentage: 50
+    # Enable podDisruptionBudget for query-frontend component
+    podDisruptionBudget:
+      enabled: false
+        # minAvailable and maxUnavailable can't be used simultaneous. Choose one.
+      minAvailable: 1
+      #  maxUnavailable: 50%
+
+    # The grpc endpoint to communicate with other components
+    grpc:
+      # grpc listen port number
+      port: 10901
+      # Service definition for query-frontend grpc service
+      service:
+        # Annotations to query-frontend grpc service
+        annotations: {}
+        # Labels to query-frontend grpc service
+        labels: {}
+        # Match labels for service selector
+        matchLabels: {}
+      # Set up ingress for the grpc service
+      ingress:
+        enabled: false
+        # Set default backend for ingress
+        defaultBackend: false
+        annotations: {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+        labels: {}
+        path: "/"
+        hosts:
+          - "/"
+        tls: []
+        #  - secretName: chart-example-tls
+        #    hosts:
+        #      - chart-example.local
+
+    psp:
+      enabled: false
+    rbac:
+      enabled: false
+
+    # The http endpoint to communicate with other components
+    http:
+      # http listen port number
+      port: 10902
+      # Service definition for query-frontend http service
+      service:
+        type: ClusterIP
+        # Annotations to query-frontend http service
+        annotations: {}
+        # Labels to query-frontend http service
+        labels: {}
+        # Match labels for service selector
+        matchLabels: {}
+      # Set up ingress for the http service
+      ingress:
+        enabled: false
+        # Set default backend for ingress
+        defaultBackend: false
+        annotations: {}
+          # kubernetes.io/ingress.class: nginx
+          # kubernetes.io/tls-acme: "true"
+        labels: {}
+        path: "/"
+        hosts:
+          - "/"
+        tls: []
+        #  - secretName: chart-example-tls
+        #    hosts:
+        #      - chart-example.local
+
+    # URL of downstream Prometheus Query compatible API.
+    # downstream-url="<thanos-querier>:<querier-http-port>"
+    downstreamUrl:
+    # Compress HTTP responses.
+    compressResponses: true
+    # Log queries that are slower than the specified duration.
+    # Set to 0 to disable.
+    # Set to < 0 to enable on all queries.
+    logQueriesLongerThan: 0
+    # Use compression in results cache. Supported
+    # values are: 'snappy' and ” (disable compression).
+    cacheCompressionType: ""
+
+    # query-range parameters, see https://thanos.io/tip/components/query-frontend.md/#flags
+    queryRange:
+      alignRangeWithStep: false
+      splitInterval: 24h
+      maxRetriesPerRequest: 5
+      maxQueryLength: 0
+      maxQueryParallelism: 14
+      responseCacheMaxFreshness: 1m
+      noPartialResponse: false
+      cache:
+        inMemory: false
+        maxSize:
+        maxSizeItems:
+        validity:
+
+    # labels parameters, see https://thanos.io/tip/components/query-frontend.md/#flags
+    qflabels:
+      splitInterval: 24h
+      maxRetriesPerRequest: 5
+      maxQueryParallelism: 14
+      responseCacheMaxFreshness: 1m
+      noPartialResponse: false
+      defaultTimeRange: 24h
+      cache:
+        inMemory: false
+        maxSize:
+        maxSizeItems:
+        validity:
+
+    log:
+      level: info
+      format: logfmt
+      request:
+        decision: LogFinishCall
+
+    certSecretName: ""
+    # Extra labels for query-frontend pod template
+    labels: {}
+    #  cluster: example
+    #
+    # Extra annotations for query-frontend pod template
+    annotations: {}
+    #  example.com: default
+    #
+    # Add extra labels to query-frontend deployment
+    deploymentLabels: {}
+    #  extraLabel: extraLabelValue
+    #
+    # Add extra annotations to query-frontend deployment
+    deploymentAnnotations: {}
+    #  extraAnnotation: extraAnnotationValue
+    #
+    # Add extra selector matchLabels to query-frontend deployment
+    deploymentMatchLabels: {}
+    #
+    # Enable metrics collecting for query-frontend service
+    metrics:
+      # This is the Prometheus annotation type scraping configuration
+      annotations:
+        enabled: false
+      # Enable ServiceMonitor https://github.com/coreos/prometheus-operator
+      serviceMonitor:
+        enabled: false
+        # Labels for prometheus-operator to find servicemonitor
+        labels: {}
+
+    # Optional securityContext
+    securityContext: {}
+    resources: {}
+    #  limits:
+    #    cpu: 2000m
+    #    memory: 16Gi
+    #  requests:
+    #    cpu: 1000m
+    #    memory: 4Gi
+    #
+    # Node tolerations for server scheduling to nodes with taints
+    # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+    #
+    # Node labels for query-frontend pod assignment
+    # Ref: https://kubernetes.io/docs/user-guide/node-selection/
+    #
+    nodeSelector: {}
+    #
+    # Pod affinity
+    # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#node-affinity
+    affinity: {}
+
+    # Optional annotations to be added to the ServiceAccount
+    serviceAccountAnnotations: {}
 
   compact:
     enabled: true
@@ -669,6 +878,7 @@ thanos: # Values for the subchart
     #  cluster: example
     #
     # Extra annotations for compact pod template
+    annotations: {}
     #  example.com: default
     #
     # Add extra labels to compact deployment
@@ -686,7 +896,7 @@ thanos: # Values for the subchart
     metrics:
       # This is the Prometheus annotation type scraping configuration
       annotations:
-        enabled: true
+        enabled: false
       # Enable ServiceMonitor https://github.com/coreos/prometheus-operator
       serviceMonitor:
         enabled: false
@@ -743,8 +953,7 @@ thanos: # Values for the subchart
       service:
         type: ClusterIP
         # Annotations to bucket http service
-        annotations: 
-          prometheus.io/scrape: "true"
+        annotations: {}
         # Labels to bucket http service
         labels: {}
         # Match labels for service selector
@@ -753,6 +962,10 @@ thanos: # Values for the subchart
       ingress:
         enabled: false
         # Set default backend for ingress
+
+        apiVersion: extensions/v1beta1
+        # Set API version for ingress
+
         defaultBackend: false
         annotations: {}
         # kubernetes.io/ingress.class: nginx
@@ -905,6 +1118,19 @@ thanos: # Values for the subchart
     replicaCount: 1
     # Kubernetes update strategy object as documented in https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
     updateStrategy: {}
+    # Create the specified persistentVolumeClaim in case persistentVolumeClaim is
+    # used for the dataVolume.backend above and needs to be created.
+    persistentVolumeClaim: {}
+    #  name: rule-data-volume
+    #  spec:
+    #    storageClassName: ""
+    #    accessModes: ["ReadWriteOnce"]
+    #    resources:
+    #      requests:
+    #        storage: 100Gi
+    #    selector: {}
+    #    volumeName: ""
+    #    volumeMode: ""
     # Enable HPA for rule component
     autoscaling:
       enabled: false
@@ -957,8 +1183,7 @@ thanos: # Values for the subchart
       service:
         type: ClusterIP
         # Annotations to rule http service
-        annotations: 
-          prometheus.io/scrape: "true"
+        annotations: {}
         # Labels to rule http service
         labels: {}
         # Match labels for service selector
@@ -967,6 +1192,10 @@ thanos: # Values for the subchart
       ingress:
         enabled: false
         # Set default backend for ingress
+
+        apiVersion: extensions/v1beta1
+        # Set API version for ingress
+
         defaultBackend: false
         annotations: {}
           # kubernetes.io/ingress.class: nginx
@@ -1004,7 +1233,7 @@ thanos: # Values for the subchart
     metrics:
       # This is the Prometheus annotation type scraping configuration
       annotations:
-        enabled: true
+        enabled: false
       # Enable ServiceMonitor https://github.com/coreos/prometheus-operator
       serviceMonitor:
         enabled: false
@@ -1087,18 +1316,22 @@ thanos: # Values for the subchart
     http:
       # http listen port number
       port: 10902
+      targetPort: 10902
       # Service definition for sidecar http service
       service:
         type: ClusterIP
         # Annotations to sidecar http service
-        annotations:
-          prometheus.io/scrape: "true"
+        annotations: {}
         # Labels to sidecar http service
         labels: {}
       # Set up ingress for the http service
       ingress:
         enabled: false
         # Set default backend for ingress
+
+        apiVersion: extensions/v1beta1
+        # Set API version for ingress
+
         defaultBackend: false
         annotations: {}
           # kubernetes.io/ingress.class: nginx
@@ -1115,12 +1348,15 @@ thanos: # Values for the subchart
 
   # This is the general backend configuration. Please se the examples below to configurate object store.
   # More information can be found at thanos github repositoriy: https://github.com/thanos-io/thanos/blob/master/docs/storage.md
-  # Existing secret containing the configuration. The key must be `f.yaml`
+  # Existing secret containing the configuration. The key must be `object-store.yaml`
   objstoreSecretOverride: ""
   # Text representation of the configuration
   objstoreFile: ""
   # YAML representation of the configuration. It's mutually exclusive with objstoreFile.
-  objstore:
+  # Priority class name to be used for all the pods
+  # https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+  priorityClassName: ""
+  objstore: {}
     # type: GCS
     # config:
     #   bucket: "thanos"
@@ -1157,10 +1393,10 @@ thanos: # Values for the subchart
     #     enable: false
     #   part_size: 0
     #
-    type: AZURE
-    config:
-      storage_account: "<sa_name>"
-      storage_account_key: "<sa_key>"
-      container: "thanos"
-      endpoint: ""
-      max_retries: 3
+    # type: AZURE
+    # config:
+    #   storage_account: ""
+    #   storage_account_key: ""
+    #   container: ""
+    #   endpoint: ""
+    #   max_retries: 0
